@@ -28,6 +28,9 @@ async function run() {
         await client.connect();
 
         const coffeeCollection = client.db('coffeeShopDB').collection('coffee');
+        const userCollection=client.db('coffeeShopDB').collection('user');
+
+
         app.get('/coffee',async(req,res)=>{
             const cursor=coffeeCollection.find();
             const result=await cursor.toArray();
@@ -75,6 +78,40 @@ async function run() {
 
 
         });
+
+        // user Database start now
+
+        app.post('/user',async(req,res)=>{
+            const newUser=req.body;
+            console.log(newUser);
+            const result=await userCollection.insertOne(newUser);
+            res.send(result);
+        });
+
+        app.get('/user',async(req,res)=>{
+            const cursur=userCollection.find();
+            const result=await cursur.toArray();
+            res.send(result);
+        });
+
+        app.delete('/user/:id',async(req,res)=>{
+            const id=req.params.id;
+            const query={_id:new ObjectId(id)}
+            const result = await userCollection.deleteOne(query);
+            res.send(result);
+        });
+
+        app.patch('/user',async(req,res)=>{
+            const user=req.body;
+            const filter={email : user.email}
+            const updateDoc={
+                $set:{
+                    lastLoggedAt:user.lastLoggedAt
+                }
+            }
+            const result=await userCollection.updateOne(filter,updateDoc);
+            res.send(result);
+        })
 
 
 
